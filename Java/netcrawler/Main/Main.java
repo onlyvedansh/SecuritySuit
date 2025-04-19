@@ -1,17 +1,92 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.SocketImplFactory;
+import java.io.OutputStreamWriter;
 import java.util.Scanner;
+import java.lang.String;
 
 
 public class Main  {
     
+
+    static class socialWindow extends Frame{
+       public socialWindow(){
+            // Window settings
+            setTitle("Social Intelligence ");
+            setSize(500,300);
+            setLayout(null);
+            setVisible(true);
+            setResizable(false);
+            addWindowListener(new WindowAdapter() {
+                public void windowClosing(WindowEvent e) {
+                    dispose();
+                }});
+                //buttons
+            TextField input = new TextField();
+            Button btn = new Button("Scan ");
+            TextArea area = new TextArea(" ");
+            area.setEditable(false);
+            Label label = new Label("Enter Username ");
+            add(label);
+            add(input);  add(area);
+            add(btn);
+            
+            //button settings
+            label.setBounds(80,100,100,20);
+            input.setBounds(80,130,90,20);
+            btn.setBounds(90,160,50,20);
+            area.setBounds(200,40,300,240);
+            area.setBackground(Color.BLACK);
+            area.setForeground(Color.GREEN);
+
+            //action to buttons in socialWindow
+                btn.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed( ActionEvent e)
+                    {
+                        String checkinput = input.getText();
+                       if (!checkinput.isEmpty())
+                        {   area.setText("loading ");
+                             // signal end of input
+                             String command = "python  -u osint.py "+" "+checkinput;
+                             ProcessBuilder pb = new ProcessBuilder("cmd.exe","/c",command );
+
+                            try {
+                                Process process=pb.start();
+                                Scanner sc= new Scanner(process.getInputStream()); 
+                                Thread.sleep(9000);
+                                new Thread(() -> {
+                                    
+                                    while (sc.hasNextLine()) {
+                                        String line = sc.nextLine();
+                                        area.append(line + "\n");
+                                    }
+                                    sc.close();
+                                }).start();
+                                
+                                
+                                
+                               
+                                }
+                            catch(IOException| InterruptedException d)
+                             {
+                                d.printStackTrace();
+                             }
+                        }
+                       
+                          if(checkinput.isEmpty()){area.setText("Input a username ! Can't leave it empty"+"\n"+"\n");}
+                     }
+                });  
+
+        }
+
+    }
     static class osintWindow extends Frame
     {
-          osintWindow()
+          public osintWindow()
            {
            setTitle("Open Source Intelligence");
            setSize(500,200);
@@ -55,24 +130,8 @@ public class Main  {
            social.addActionListener(new ActionListener(){
             @Override  
             public void actionPerformed(ActionEvent e){
-            textarea.setText(" ");
-            ProcessBuilder pb = new ProcessBuilder("cmd.exe","/c","cd C:\\Users\\vedan\\OneDrive\\Desktop\\projects\\Java\\netcrawler\\Main\\Scripts\\OSINT","/c", "python osint.py");
-                    
-                try {
-                    Process process  = pb.start();
-                    Scanner sc = new Scanner(process.getInputStream());
-                    while(sc.hasNextLine())
-                    {
-                        String line = sc.nextLine();
-                        textarea.append(line);
-                    }
-                    String cmds = textarea.getText();
-                  
-                    
-                } catch(IOException d)
-                 { d.printStackTrace();
-                }
-                
+              
+                new socialWindow();
             }
            });
 
@@ -243,8 +302,6 @@ public class Main  {
 
             add(Oscan);
             add(Oinput);
-
-            
 
             //set bounds for label and buttons
             stealth.setBounds(50, 40, 95, 20);
@@ -687,7 +744,7 @@ public class Main  {
     public static void main(String[] args) 
     {
          
-        new Loading();
+        new mainn();
         
         
         
