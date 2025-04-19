@@ -6,8 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Scanner;
-import java.lang.String;
-
+import javax.swing.ImageIcon;
 
 public class Main  {
     
@@ -568,6 +567,93 @@ public class Main  {
    }
 }
 
+    static class imageLoading extends Frame
+    {
+        public imageLoading()
+        {
+            //frame setttings 
+            
+         // Get screen size
+            setLocation(430,100);
+            setUndecorated(true);
+            setVisible(true);
+            setSize(700,500);
+            setResizable(false);
+            
+            Image image = Toolkit.getDefaultToolkit().getImage("image.png");
+            Canvas canvas = new Canvas() {
+                public void paint(Graphics g) {
+                    g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+                }
+            };
+    
+            add(canvas);
+
+        
+            new Thread(() -> {
+                try {
+                    Thread.sleep(4000);
+                   
+                    new installnmap();
+                    dispose();
+                    
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        }
+    }
+
+static class installnmap extends Frame{
+    public installnmap()
+    {
+            //frame setting
+            
+            setUndecorated(true);
+            setLayout(null);
+            setBackground(new Color(103, 174, 110));
+            setVisible(true);
+            setBounds(500,100,500,500);
+            setResizable(false);
+
+            //adding elements
+            Panel panel = new Panel();  
+            add(panel); 
+            panel.setVisible(true);
+            panel.setLayout(null); 
+            panel.setBounds(100,80,300,300);
+            panel.setBackground(new Color(144, 198, 124));
+            panel.setForeground(new Color(225, 238, 188));
+            Label label1 = new Label("Secure Suite wants to install Nmap tool ");  label1.setBounds(10,10,400,20); panel.add(label1);
+            label1.setFont(new Font("Lucida Console",Font.PLAIN ,  15));
+            Button yes = new Button("Install Nmap"); Button no = new Button("Continue Without installation");
+            yes.setBounds(50,70,200,20); yes.setFont(new Font ("Arial", Font.BOLD , 10));
+            no.setBounds(50,110,200,20); no.setFont(new Font ("Arial", Font.BOLD , 10));
+            panel.add(yes); panel.add(no);
+
+            //adding close button to frame
+            Button close = new Button ( "Close");
+            close.setBounds(50,150,200,20); close.setFont(new Font ("Arial", Font.BOLD , 10));
+            panel.add(close);
+
+            yes.addActionListener((e)->{
+                new Loading();
+                dispose();
+            });
+            no.addActionListener((e)->{
+                new mainn();
+                dispose();
+            });
+
+            close.addActionListener((e)->{
+                dispose();
+            });
+
+
+    }
+}
+
+
     //Loading window()
     static class Loading extends Frame {
         public Loading() {
@@ -744,7 +830,7 @@ public class Main  {
     public static void main(String[] args) 
     {
          
-        new mainn();
+      new imageLoading();
         
         
         
