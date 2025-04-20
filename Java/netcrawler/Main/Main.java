@@ -623,7 +623,7 @@ static class installnmap extends Frame{
             panel.setLayout(null); 
             panel.setBounds(100,80,300,300);
             panel.setBackground(new Color(144, 198, 124));
-            panel.setForeground(new Color(225, 238, 188));
+            panel.setForeground(new Color(39, 68, 93));
             Label label1 = new Label("Secure Suite wants to install Nmap tool ");  label1.setBounds(10,10,400,20); panel.add(label1);
             label1.setFont(new Font("Lucida Console",Font.PLAIN ,  15));
             Button yes = new Button("Install Nmap"); Button no = new Button("Continue Without installation");
@@ -747,12 +747,30 @@ static class installnmap extends Frame{
 
             //main window settings
             setTitle("Menu");
-            setSize(500,400);
+            setBounds(500,500,800,600);
+            Panel panel = new Panel()
+            {
+                @Override
+                public void paint(Graphics g) {
+                    super.paint(g);
+                    // Draw border
+                    g.setColor(Color.BLACK);
+                    g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
+                }
+            };           add(panel);
             setLayout(null);
             setLocationRelativeTo(null);
             setVisible(true);
             setResizable(false);
-            addWindowListener(new WindowAdapter() {
+           // setForeground(c);
+            setBackground(new Color(103, 174, 110));
+
+            //panel settings
+            panel.setBackground(new Color(144, 198, 124));
+            panel.setForeground(new Color(39, 68, 93));
+            panel.setBounds(15,40,50,540);
+
+            addWindowListener(new WindowAdapter() {    //window closing button
                 public void windowClosing(WindowEvent e) {
                     dispose();
                 }
@@ -760,19 +778,20 @@ static class installnmap extends Frame{
         
             //buttons for scan window
             Button scan = new Button("Scan");
-            add(scan);
+            panel.add(scan);
             Button honey = new Button("Honeypot");
-            add(honey);
+            panel.add(honey);
             Button osint = new Button("OSINT");
-            add(osint);
-            Button spoof = new Button("Spoof");
-            add(spoof);
-            Button flood = new Button("Flood");
-            add(flood);
-            Button browser = new Button("Safe Browser");
-            add(browser);
-            Button sys = new Button("Threat Scan");
-            add(sys);
+            panel.add(osint);
+            Button virus = new Button("Malware / Virus Scan");
+            panel.add(virus);
+            //Button flood = new Button("Flood");
+            //add(flood);
+            //Button browser = new Button("Safe Browser");
+            //add(browser);
+            Button sys = new Button("Intro.. Sys");
+            panel.add(sys);
+
 
            
            osint.setBounds(115, 30, 40, 20);
@@ -785,9 +804,9 @@ static class installnmap extends Frame{
     
            scan.setBounds(10, 30, 40, 20);
            honey.setBounds(55, 30, 55, 20);
-            spoof.setBounds(165, 30, 40, 20);
-            flood.setBounds(205, 30, 40, 20);
-            browser.setBounds(250, 30, 90, 20);
+            virus.setBounds(165, 30, 40, 20);
+            //flood.setBounds(205, 30, 40, 20);
+            //browser.setBounds(250, 30, 90, 20);
             sys.setBounds(345, 30, 100, 20);
 
            
@@ -817,20 +836,13 @@ static class installnmap extends Frame{
 
   
 
-    //OSINT window
-
-    //spoof winodw
-
-    //flood window
-
-    //browser window 
-
+   
     //intrudtion system
 
     public static void main(String[] args) 
     {
          
-      new imageLoading();
+      new mainn();
         
         
         
