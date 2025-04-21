@@ -748,27 +748,30 @@ static class installnmap extends Frame{
             //main window settings
             setTitle("Menu");
             setBounds(500,500,800,600);
-            Panel panel = new Panel()
-            {
-                @Override
-                public void paint(Graphics g) {
-                    super.paint(g);
-                    // Draw border
-                    g.setColor(Color.BLACK);
-                    g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
-                }
-            };           add(panel);
-            setLayout(null);
+            //Panel panel = new Panel()
+            //{
+            //    @Override
+            //    public void paint(Graphics g) {
+            //        super.paint(g);
+            //        // Draw border
+            //        g.setColor(Color.BLACK);
+            //        g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
+            //    }
+            //};           add(panel);
+            setLayout(new FlowLayout() );
             setLocationRelativeTo(null);
             setVisible(true);
-            setResizable(false);
+            setResizable(true);
+            Panel centerPanel = new Panel(); 
+            centerPanel.setBounds(10,10,100,800);
+            add(centerPanel);
            // setForeground(c);
             setBackground(new Color(103, 174, 110));
 
             //panel settings
-            panel.setBackground(new Color(144, 198, 124));
-            panel.setForeground(new Color(39, 68, 93));
-            panel.setBounds(15,40,50,540);
+            //panel.setBackground(new Color(144, 198, 124));
+            //panel.setForeground(new Color(39, 68, 93));
+            //panel.setBounds(15,40,50,540);
 
             addWindowListener(new WindowAdapter() {    //window closing button
                 public void windowClosing(WindowEvent e) {
@@ -776,38 +779,46 @@ static class installnmap extends Frame{
                 }
             });
         
-            //buttons for scan window
+            //buttons for mainn window
             Button scan = new Button("Scan");
-            panel.add(scan);
+            centerPanel.add(scan);
+            Button about = new Button("About");
+            centerPanel.add(about);
             Button honey = new Button("Honeypot");
-            panel.add(honey);
+            centerPanel.add(honey);
             Button osint = new Button("OSINT");
-            panel.add(osint);
+            centerPanel.add(osint);
             Button virus = new Button("Malware / Virus Scan");
-            panel.add(virus);
+            centerPanel.add(virus);
             //Button flood = new Button("Flood");
             //add(flood);
             //Button browser = new Button("Safe Browser");
             //add(browser);
             Button sys = new Button("Intro.. Sys");
-            panel.add(sys);
+            centerPanel.add(sys);
 
+            //more add in mainn window
+            //TextArea area1 = new TextArea("yo;lsdsabdashbdjhbschjabsdhubdscjbsdbsjdbsdbsdsd ",60,60,TextArea.SCROLLBARS_NONE);
+            //area1.setBounds(100,50,250,70); area1.setEditable(false);
+            //add(area1);
+            //
+            //TextArea area2 = new TextArea("yo;lsdsabdashbdjhbschjabsdhubdscjbsdbsjdbsdbsdsd ",60,60,TextArea.SCROLLBARS_NONE);
+            //area2.setBounds(400,50,250,70); area2.setEditable(false);
+            //add(area2);
 
            
-           osint.setBounds(115, 30, 40, 20);
+           //osint.setBounds(10, 160, 40, 20);
            osint.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e){
                     new osintWindow();
             }
            });
-
-    
-           scan.setBounds(10, 30, 40, 20);
-           honey.setBounds(55, 30, 55, 20);
-            virus.setBounds(165, 30, 40, 20);
+           //scan.setBounds(10, 30, 40, 20);
+           //honey.setBounds(10, 60, 55, 20);
+            //virus.setBounds(10, 90, 40, 20);
             //flood.setBounds(205, 30, 40, 20);
             //browser.setBounds(250, 30, 90, 20);
-            sys.setBounds(345, 30, 100, 20);
+            //sys.setBounds(10, 120, 100, 20);
 
            
 
