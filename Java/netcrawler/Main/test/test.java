@@ -1,221 +1,126 @@
-import java.awt.*;
-import java.awt.event.*;
-import java.io.File;
-import javax.swing.*;
 
-public class test extends JFrame {
-    private final Color BG_COLOR = new Color(103, 174, 110);
-    private final Color FG_COLOR = new Color(39, 68, 93);
-    private JPanel mainPanel;
-    private CardLayout cardLayout;
+static class virusScan extends JFrame {
+    private JTextArea outputArea;
+    private JButton selectFileButton;
+    private JButton scanButton;
+    private JLabel fileLabel;
+    private File selectedFile;
 
-    public test() {
-        setTitle("Cyber Security Dashboard");
-        setSize(1200, 800);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        
-        // Main container with sidebar and content
-        JPanel container = new JPanel(new BorderLayout());
-        container.add(createSidebar(), BorderLayout.WEST);
-        container.add(createHeader(), BorderLayout.NORTH);
-        container.add(createMainContent(), BorderLayout.CENTER);
-        
-        add(container);
+    public virusScan() {
+        // Frame setup
+        setTitle("Virus Scan");
+        setSize(500, 400);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null); // Center the window
+        setResizable(false);
+
+        // Use BorderLayout for better component management
+        setLayout(new BorderLayout(10, 10));
+
+        // Top panel for file selection and buttons
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        selectFileButton = new JButton("Select File");
+        scanButton = new JButton("Scan");
+        fileLabel = new JLabel("No file selected");
+        scanButton.setEnabled(false); // Disabled until a file is selected
+
+        topPanel.add(selectFileButton);
+        topPanel.add(scanButton);
+        topPanel.add(fileLabel);
+        add(topPanel, BorderLayout.NORTH);
+
+        // Text area for output
+        outputArea = new JTextArea(20, 40);
+        outputArea.setEditable(false);
+        outputArea.setFont(new Font("Courier New", Font.PLAIN, 14));
+        outputArea.setBackground(new Color(115, 199, 199));
+        outputArea.setForeground(new Color(7, 122, 125));
+        JScrollPane scrollPane = new JScrollPane(outputArea);
+        add(scrollPane, BorderLayout.CENTER);
+
+        // Select file button action
+        selectFileButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Choose File");
+            if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                selectedFile = fileChooser.getSelectedFile();
+                fileLabel.setText(selectedFile.getName());
+                scanButton.setEnabled(true);
+                outputArea.setText(""); // Clear previous output
+            }
+        });
+
+        // Scan button action
+        scanButton.addActionListener(e -> {
+            if (selectedFile == null) {
+                JOptionPane.showMessageDialog(this, "Please select a file first.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            outputArea.setText("Starting scan...\n");
+            scanButton.setEnabled(false);
+            selectFileButton.setEnabled(false);
+
+            // Run Python script in a separate thread to avoid blocking EDT
+            new Thread(() -> runPythonScript()).start();
+        });
     }
 
-    private JPanel createHeader() {
-        JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(BG_COLOR);
-        header.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        
+    private void runPythonScript() {
         try {
-            ImageIcon logo = new ImageIcon("logo.png"); // Add your logo path
-            JLabel logoLabel = new JLabel(new ImageIcon(logo.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH)));
-            header.add(logoLabel, BorderLayout.WEST);
-        } catch (Exception e) {
-            System.out.println("Logo not found, using text instead");
-            JLabel title = new JLabel("Cyber Security Suite");
-            title.setFont(new Font("Arial", Font.BOLD, 24));
-            title.setForeground(Color.WHITE);
-            header.add(title, BorderLayout.WEST);
+            // Ensure virus_check.py exists
+            File pythonScript = new File("virus_check.py");
+            if (!pythonScript.exists()) {
+                appendOutput("Error: virus_check.py not found in the current directory.\n");
+                SwingUtilities.invokeLater(() -> {
+                    JOptionPane.showMessageDialog(this,
+                            "virus_check.py not found in the current directory.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    resetButtons();
+                });
+                return;
+            }
+
+            // Build command: python virus_check.py "file_path"
+            String command = String.format("python virus_check.py \"%s\"",
+                    selectedFile.getAbsolutePath().replace("\"", "\\\""));
+            ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", command);
+            builder.redirectErrorStream(true); // Combine stdout and stderr
+            Process process = builder.start();
+
+            // Read output in a separate thread
+            try (Scanner scanner = new Scanner(process.getInputStream())) {
+                while (scanner.hasNextLine()) {
+                    String line = scanner.nextLine();
+                    appendOutput(line + "\n");
+                }
+            }
+
+            // Wait for the process to complete and check exit code
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                appendOutput("Error: Python script exited with code " + exitCode + "\n");
+            } else {
+                appendOutput("Scan completed.\n");
+            }
+
+        } catch (IOException e) {
+            appendOutput("IO Error: " + e.getMessage() + "\n");
+        } catch (InterruptedException e) {
+            appendOutput("Process interrupted: " + e.getMessage() + "\n");
+        } finally {
+            SwingUtilities.invokeLater(this::resetButtons);
         }
-
-        JLabel clock = new JLabel();
-        clock.setForeground(Color.WHITE);
-        clock.setFont(new Font("Arial", Font.BOLD, 18));
-        new Timer(1000, e -> clock.setText(new java.util.Date().toString())).start();
-        header.add(clock, BorderLayout.EAST);
-
-        return header;
     }
 
-    private JPanel createSidebar() {
-        JPanel sidebar = new JPanel();
-        sidebar.setBackground(FG_COLOR);
-        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
-
-        String[][] buttons = {
-            {"network", "Network Scan"},
-            {"osint", "OSINT Tools"},
-            {"honeypot", "Create Honeypot"},
-            {"system", "System Detection"},
-            {"malware", "Malware Scanner"},
-            {"about", "About"}
-        };
-
-        for (String[] btn : buttons) {
-            JButton button = new JButton(btn[1]);
-            button.setName(btn[0]);
-            styleButton(button);
-            button.addActionListener(this::handleMenuClick);
-            sidebar.add(button);
-            sidebar.add(Box.createRigidArea(new Dimension(0, 15)));
-        }
-
-        return sidebar;
+    private void appendOutput(String text) {
+        // Update TextArea on EDT for thread safety
+        SwingUtilities.invokeLater(() -> outputArea.append(text));
     }
 
-    private void styleButton(JButton button) {
-        button.setForeground(Color.WHITE);
-        button.setBackground(FG_COLOR);
-        button.setFont(new Font("Arial", Font.BOLD, 16));
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        button.setAlignmentX(Component.LEFT_ALIGNMENT);
-        button.setMaximumSize(new Dimension(200, 50));
-        
-        // Hover effects
-        button.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                button.setBackground(BG_COLOR);
-                button.setForeground(Color.WHITE);
-            }
-
-            public void mouseExited(MouseEvent e) {
-                button.setBackground(FG_COLOR);
-                button.setForeground(Color.WHITE);
-            }
-        });
-    }
-
-    private JPanel createMainContent() {
-        mainPanel = new JPanel();
-        cardLayout = new CardLayout();
-        mainPanel.setLayout(cardLayout);
-
-        // Add different views
-        mainPanel.add(createNetworkScanPanel(), "network");
-        mainPanel.add(createOSINTPanel(), "osint");
-        mainPanel.add(createHoneypotPanel(), "honeypot");
-        mainPanel.add(createSystemPanel(), "system");
-        mainPanel.add(createMalwarePanel(), "malware");
-        mainPanel.add(createAboutPanel(), "about");
-
-        return mainPanel;
-    }
-
-    private void handleMenuClick(ActionEvent e) {
-        String command = ((JButton) e.getSource()).getName();
-        cardLayout.show(mainPanel, command);
-    }
-
-    // Different Function Panels
-    private JPanel createNetworkScanPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        
-        JTextArea results = new JTextArea();
-        JButton scanButton = new JButton("Start Network Scan");
-        scanButton.addActionListener(e -> results.setText("Scanning network...\n"));
-        
-        panel.add(new JScrollPane(results), BorderLayout.CENTER);
-        panel.add(scanButton, BorderLayout.SOUTH);
-        return panel;
-    }
-
-    private JPanel createOSINTPanel() {
-        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
-        panel.setBackground(Color.WHITE);
-        
-        String[] tools = {"Whois Lookup", "DNS Records", "IP Geolocation", "Social Media Search"};
-        for (String tool : tools) {
-            JButton btn = new JButton(tool);
-            styleToolButton(btn);
-            panel.add(btn);
-        }
-        return panel;
-    }
-
-    private JPanel createHoneypotPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(Color.WHITE);
-        
-        panel.add(new JLabel("Honeypot Configuration"));
-        panel.add(new JTextField("Enter port number"));
-        panel.add(new JButton("Deploy Honeypot"));
-        return panel;
-    }
-
-    private JPanel createSystemPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        
-        JTextArea sysInfo = new JTextArea();
-        sysInfo.setText("OS: " + System.getProperty("os.name") + "\n" +
-                      "Arch: " + System.getProperty("os.arch") + "\n" +
-                      "CPU Cores: " + Runtime.getRuntime().availableProcessors());
-        
-        panel.add(new JScrollPane(sysInfo), BorderLayout.CENTER);
-        return panel;
-    }
-
-    private JPanel createMalwarePanel() {
-        JPanel panel = new JPanel(new FlowLayout());
-        panel.setBackground(Color.WHITE);
-        
-        JButton fileChooser = new JButton("Select File to Scan");
-        fileChooser.addActionListener(e -> {
-            JFileChooser fc = new JFileChooser();
-            if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
-                JOptionPane.showMessageDialog(this, "Scanning: " + file.getName());
-            }
-        });
-        
-        panel.add(fileChooser);
-        return panel;
-    }
-
-    private JPanel createAboutPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        
-        JTextArea about = new JTextArea();
-        about.setText("Cyber Security Dashboard\nVersion 1.0\n\nDeveloped for comprehensive security operations");
-        about.setEditable(false);
-        
-        panel.add(about, BorderLayout.CENTER);
-        return panel;
-    }
-
-    private void styleToolButton(JButton btn) {
-        btn.setBackground(FG_COLOR);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("Arial", Font.PLAIN, 14));
-    }
-
-    public static void main(String[] args) {
-        EventQueue.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                new test().setVisible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+    private void resetButtons() {
+        scanButton.setEnabled(selectedFile != null);
+        selectFileButton.setEnabled(true);
     }
 }
