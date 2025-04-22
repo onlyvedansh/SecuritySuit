@@ -1,19 +1,24 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.time.LocalDate;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.sql.Date;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
-import javax.swing.ImageIcon;
 
 public class Main  {
     
 
     static class socialWindow extends Frame{
        public socialWindow(){
+
+        
+
             // Window settings
+
             setTitle("Social Intelligence ");
             setSize(500,300);
             setLayout(null);
@@ -153,6 +158,13 @@ public class Main  {
             setResizable(false);
             setLocationRelativeTo(null);
 
+            addWindowListener(new WindowAdapter() {
+                public void windowClosing(WindowEvent e) {
+                    dispose();
+                }
+            });
+            
+
             //buttons
             Button spyware,plink;
             spyware=new Button("Spyware Scan");
@@ -162,9 +174,40 @@ public class Main  {
             spyware.setBounds(20, 40, 80, 30);
             plink.setBounds(105, 40, 100, 30);
             TextArea output=new TextArea();
-            output.setBounds(20, 100, 350, 250);
+            output.setBounds(20, 150, 350, 200);
             output.setEditable(false);
             add(output);
+            TextField url = new TextField("example.com"); url.setBounds(20, 90, 200, 30);
+            add(url);
+            Button vt = new Button (" Go");
+            vt.setBounds(240, 90, 40, 30); add(vt);
+            vt.setVisible(false); url.setVisible(false);
+
+
+            vt.addActionListener(new ActionListener(){
+                public void actionPerformed(ActionEvent e ){
+                    
+                    String command ="python vt.py "+" "+url.getText();
+                ProcessBuilder builder = new ProcessBuilder("cmd.exe","/c",command);
+                   try{ Process process = builder.start();
+                    Scanner sc= new Scanner(process.getInputStream());
+                     new Thread(() -> {
+                        while (sc.hasNextLine()) {
+                            String line = sc.nextLine();
+                            output.append(line + "\n");
+                        }
+                        sc.close();
+                    }).start();
+                 }
+
+
+                   catch(IOException d)
+                   {
+                    d.printStackTrace();
+                   }
+                }
+            });
+            
 
             spyware.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e ){
@@ -186,6 +229,14 @@ public class Main  {
                     d.printStackTrace();
                    }
                 }
+            });
+
+
+            plink.addActionListener(new ActionListener(){
+                public void actionPerformed(ActionEvent e ){
+                    
+                    vt.setVisible(true); url.setVisible(true);}
+                  
             });
             
         }
@@ -744,10 +795,20 @@ static class installnmap extends Frame{
      //Main window()
     static class mainn extends Frame{
         mainn(){
+            
+          
 
+
+            LocalDate date = LocalDate.now();
+            LocalTime time = LocalTime.now();
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+            String dateString = date.format(dateFormatter);
+            String timeString = time.format(timeFormatter);
+      
             //main window settings
             setTitle("Menu");
-            setBounds(500,500,800,600);
+            setBounds(500,170,800,600);
             //Panel panel = new Panel()
             //{
             //    @Override
@@ -758,15 +819,14 @@ static class installnmap extends Frame{
             //        g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
             //    }
             //};           add(panel);
-            setLayout(new FlowLayout() );
-            setLocationRelativeTo(null);
+            setLayout(null);
             setVisible(true);
-            setResizable(true);
+            setResizable(false);
             Panel centerPanel = new Panel(); 
-            centerPanel.setBounds(10,10,100,800);
+            centerPanel.setBounds(10,10,170,800);
             add(centerPanel);
            // setForeground(c);
-            setBackground(new Color(103, 174, 110));
+            setBackground(new Color(3, 167, 145));
 
             //panel settings
             //panel.setBackground(new Color(144, 198, 124));
@@ -790,55 +850,107 @@ static class installnmap extends Frame{
             centerPanel.add(osint);
             Button virus = new Button("Malware / Virus Scan");
             centerPanel.add(virus);
-            //Button flood = new Button("Flood");
-            //add(flood);
-            //Button browser = new Button("Safe Browser");
-            //add(browser);
             Button sys = new Button("Intro.. Sys");
             centerPanel.add(sys);
 
             //more add in mainn window
-            //TextArea area1 = new TextArea("yo;lsdsabdashbdjhbschjabsdhubdscjbsdbsjdbsdbsdsd ",60,60,TextArea.SCROLLBARS_NONE);
-            //area1.setBounds(100,50,250,70); area1.setEditable(false);
-            //add(area1);
-            //
-            //TextArea area2 = new TextArea("yo;lsdsabdashbdjhbschjabsdhubdscjbsdbsjdbsdbsdsd ",60,60,TextArea.SCROLLBARS_NONE);
-            //area2.setBounds(400,50,250,70); area2.setEditable(false);
-            //add(area2);
 
-           
-           //osint.setBounds(10, 160, 40, 20);
-           osint.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e){
-                    new osintWindow();
-            }
-           });
-           //scan.setBounds(10, 30, 40, 20);
-           //honey.setBounds(10, 60, 55, 20);
-            //virus.setBounds(10, 90, 40, 20);
-            //flood.setBounds(205, 30, 40, 20);
-            //browser.setBounds(250, 30, 90, 20);
-            //sys.setBounds(10, 120, 100, 20);
+            Label label1 = new Label("Date n time");
+            add(label1);
+            label1.setBackground(new Color(115, 199, 199));
+            label1.setForeground(new Color(7, 122, 125));
+            label1.setFont(new Font("Courier New", Font.BOLD, 14));
+            label1.setBounds(680,600,100,40);
 
-           
+
+            TextArea area1 = new TextArea("Network Scanned :0 ",60,60,TextArea.SCROLLBARS_NONE);
+            area1.setBounds(200,50,200,100); area1.setEditable(false);
+            add(area1); 
+            area1.setBackground(new Color(115, 199, 199));
+            area1.setForeground(new Color(7, 122, 125));
+            area1.setFont(new Font("Courier New", Font.BOLD, 14));
+
+            
+            TextArea area3 = new TextArea("Malware Found :0 ",60,60,TextArea.SCROLLBARS_NONE);
+            area3.setBounds(200,160,200,100); area3.setEditable(false);
+            add(area3); 
+            area3.setBackground(new Color(115, 199, 199));
+            area3.setForeground(new Color(7, 122, 125));
+            area3.setFont(new Font("Courier New", Font.BOLD, 14));
+
+
+
+            TextArea area2 = new TextArea("Suspecious Device :0",60,60,TextArea.SCROLLBARS_NONE);
+            area2.setBounds(450,50,200,100); area2.setEditable(false);
+            add(area2); 
+            area2.setBackground(new Color(115, 199, 199));
+            area2.setForeground(new Color(7, 122, 125));
+            area2.setFont(new Font("Courier New", Font.BOLD, 14));
+
+            TextArea area4 = new TextArea("Link Scanned : ",60,60,TextArea.SCROLLBARS_NONE);
+            area4.setBounds(450,160,200,100); area4.setEditable(false);
+            add(area4); 
+            area4.setBackground(new Color(115, 199, 199));
+            area4.setForeground(new Color(7, 122, 125));
+            area4.setFont(new Font("Courier New", Font.BOLD, 14));
+
+
+            TextArea area5 = new TextArea(" Logs  " , 20 , 20 , TextArea.SCROLLBARS_VERTICAL_ONLY);
+            area5.setBounds(200,480,550,100); area5.setEditable(false);
+            add(area5); 
+            area5.setBackground(new Color(115, 199, 199));
+            area5.setForeground(new Color(7, 122, 125));
+            area5.setFont(new Font("Courier New", Font.BOLD, 14));
+
+            /////////////////////////
+
+
+           centerPanel.setBackground(new Color(129, 231, 175));
+           osint.setBounds(10, 180, 120, 20);
+           scan.setBounds(10, 40, 120, 20);
+           honey.setBounds(10, 80, 120, 20);
+           virus.setBounds(10, 110, 120, 20);    
+            sys.setBounds(10, 140, 120, 20);
+            about.setBounds(10, 210, 120, 20);
+
+         //clock
+
+         
+       
+ 
+            
+            osint.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e){
+                        new osintWindow();
+                        area5.append("\n"+"Latest OSINT search At : " + timeString + "\t");
+                        area5.append(dateString + "\n");
+                }
+               });
+
 
             //actions for scan button
 
             scan.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e ){
                     new Scan();
+                    area5.append("\n"+"Latest Scan At : " + timeString + "\t");
+                    area5.append(dateString + "\n");
                 }
             });
 
             honey.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e ){
                     new Honey();
+                    area5.append("\n"+"Latest honeypot created At : " + timeString + "\t");
+                    area5.append(dateString + "\n");
                 }
             });
 
             sys.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e ){
                     new ThreatScan();
+                    area5.append("\n"+"Latest Threat Scan At : " + timeString + "\t");
+                    area5.append(dateString + "\n");
                 }
             });
             
